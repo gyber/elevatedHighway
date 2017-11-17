@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+	<style type="text/css">
+		body,
+		html,
+		#allmap {
+			width: 100%;
+			height: 100%;
+			overflow: hidden;
+			margin: 0;
+			font-family: "微软雅黑";
+		}
+	</style>
+	<script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=ihRuuvrfQGL3dWWEcKrQeX3n74mtnoTQ"></script>
+	<title>hzrxdy</title>
+</head>
+
+<body>
+	<div id="allmap"></div>
+</body>
+
+</html>
+<script type="text/javascript">
+
+	var zoomLevel = {
+		22: 2,
+		21: 5,
+		20: 10,
+		19: 20,
+		18: 50,
+		17: 100,
+		16: 200,
+		15: 500,
+		14: 1000,
+		13: 2000,
+		12: 5000,
+		11: 10000,
+		10: 20000,
+		9: 25000,
+		8: 50000,
+		7: 100000,
+		6: 200000,
+		5: 500000,
+		4: 1000000,
+		3: 2000000
+	};
+	var zoomOffset = 15;
+	var zoomMax = 15,zoomMin=13;
+	var wOffset = 200;
+	var hOffset = 100;
+
+	// 百度地图API功能
+	var map = new BMap.Map("allmap");    // 创建Map实例
+	var oplng=120.1,oplat=30.2;
+	var point = new BMap.Point(oplng, oplat);
+	map.centerAndZoom(point, zoomOffset);  // 初始化地图,设置中心点坐标和地图级别
+	//添加地图类型控件
+	map.addControl(new BMap.MapTypeControl({
+		mapTypes: [
+			BMAP_NORMAL_MAP
+		]
+	}));
+	map.setCurrentCity("杭州");          // 设置地图显示的城市 此项是必须设置的
+	map.enableScrollWheelZoom(true);     //开启鼠标滚轮缩放
+
+	map.setMinZoom(zoomMin);
+	map.setMaxZoom(zoomMax);
+
+	// var planeSym = new BMap.Symbol(BMap_Symbol_SHAPE_PLANE, {
+	// 	scale: 3,
+	// 	rotation: 0
+	// });
+	// var redIcon = new BMap.Icon("./pics/red.png", new BMap.Size(wOffset, hOffset));
+	// var blueIcon = new BMap.Icon("./pics/blue.png", new BMap.Size(wOffset, hOffset));
+
+	// var vectorPlane = new BMap.Marker(new BMap.Point(point.lng, point.lat), {
+	// 	// 初始化小飞机Symbol
+	// 	icon: planeSym
+	// });
+
+	//	var w = 3;
+
+	var ratioOffset=5;
+	var ehIcon = new Array();
+	var ehOffset = [[125/ratioOffset, 1250/ratioOffset], [125/ratioOffset, 1650/ratioOffset], [675/ratioOffset, 2250/ratioOffset]];
+
+	var ratio;
+
+	ehIcon[0] = new BMap.Icon("./pics/eha.png", new BMap.Size(ehOffset[0][0], ehOffset[0][1]));
+	ehIcon[1] = new BMap.Icon("./pics/ehb.png", new BMap.Size(ehOffset[1][0], ehOffset[1][1]));
+	ehIcon[2] = new BMap.Icon("./pics/ehc.png", new BMap.Size(ehOffset[2][0], ehOffset[2][1]));
+
+	var ehVector = new Array();
+	ehVector[0] = new BMap.Marker(new BMap.Point(oplng+0.00062,oplat+0.0178), { icon: ehIcon[0] });
+	ehVector[1] = new BMap.Marker(new BMap.Point(oplng,oplat), { icon: ehIcon[1] });
+	ehVector[2] = new BMap.Marker(new BMap.Point(oplng+0.0041,oplat-0.0242), { icon: ehIcon[2] });
+
+
+	ratio = zoomLevel[zoomMax] / zoomLevel[map.getZoom()];
+	for (var i = 0; i < 3; i++) {
+		ehIcon[i].setSize(new BMap.Size(ehOffset[i][0] * ratio, ehOffset[i][1] * ratio));
+		ehIcon[i].setImageSize(new BMap.Size(ehOffset[i][0] * ratio, ehOffset[i][1] * ratio));
+		ehIcon[i].setAnchor(new BMap.Size(ehOffset[i][0] * ratio / 2, ehOffset[i][1] * ratio / 2));
+		ehVector[i].setIcon(ehIcon[i]);
+	}
+
+	ehVector.map(function (ele) {
+		map.addOverlay(ele);
+	});
+
+	ehVector[0].addEventListener("click",function(){
+		window.location.href='/eha';
+	});
+	ehVector[1].addEventListener("click",function(){
+		window.location.href='/ehb';
+	});
+	ehVector[2].addEventListener("click",function(){
+		window.location.href='/ehc';
+	});
+
+	ehVector[0].addEventListener("longpress",function(){
+		window.location.href='/eha';
+	});
+	ehVector[1].addEventListener("longpress",function(){
+		window.location.href='/ehb';
+	});
+	ehVector[2].addEventListener("longpress",function(){
+		window.location.href='/ehc';
+	});
+
+	map.addEventListener('zoomend', function () {
+		//alert("地图加载完毕");
+		//planeSym.setScale(w = w + 1);
+		//vectorPlane.setIcon(planeSym);
+
+		ratio = zoomLevel[zoomMax] / zoomLevel[map.getZoom()];
+		for (var i = 0; i < 3; i++) {
+			ehIcon[i].setSize(new BMap.Size(ehOffset[i][0] * ratio, ehOffset[i][1] * ratio));
+			ehIcon[i].setImageSize(new BMap.Size(ehOffset[i][0] * ratio, ehOffset[i][1] * ratio));
+			ehIcon[i].setAnchor(new BMap.Size(ehOffset[i][0] * ratio / 2, ehOffset[i][1] * ratio / 2));
+			ehVector[i].setIcon(ehIcon[i]);
+		}
+		//		alert(ratio);
+
+		//redIcon.setSize(new BMap.Size(wOffset*ratio,hOffset*ratio));
+		//redIcon.setImageSize(new BMap.Size(wOffset*ratio,hOffset*ratio));
+		//redIcon.setAnchor(new BMap.Size(wOffset*ratio/2,hOffset*ratio/2));
+		//vectorRed.setIcon(redIcon);
+
+		//alert([redIcon.anchor.width,redIcon.anchor.height]);
+
+		//blueIcon.setSize(new BMap.Size(wOffset*ratio,hOffset*ratio));
+		//blueIcon.setImageSize(new BMap.Size(wOffset*ratio,hOffset*ratio));
+		//blueIcon.setAnchor(new BMap.Size(wOffset*ratio/2,hOffset*ratio/2));
+		//vectorBlue.setIcon(blueIcon);
+	});
+
+	//map.addOverlay(vectorPlane);
+
+	//var vectorRed = new BMap.Marker(point, { icon: redIcon });
+	//var vectorBlue = new BMap.Marker(point, { icon: blueIcon });
+
+	//map.addOverlay(vectorRed);
+	//map.addOverlay(vectorBlue);
+
+//	alert(blueIcon.anchor.width);
+
+</script>
